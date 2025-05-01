@@ -1,110 +1,82 @@
-# ETF Trend vs Oscillation Prediction Project
+# ETF Market Behavior Prediction
+
+This project applies machine learning techniques to predict short-term market behavior of major ETFs (SPY, IWM, QQQ, DIA), distinguishing between trending and oscillating states. The focus is on predicting whether SPY will oscillate (daily price movements within 0.5%) or trend (movements exceeding 0.5%).
 
 ## Project Overview
 
-This project implements machine learning models to predict whether the SPY ETF will trend (>0.5% daily price movement) or oscillate (≤0.5% daily price movement) using historical market data and technical indicators.
+- **Goal**: Predict market oscillation for SPY ETF with at least 12% improvement over a naive classifier
+- **Data**: 15-25 years of historical market data with macroeconomic indicators and technical variables
+- **Methods**: Multiple ML models compared (LSTM, Random Forest, KNN, Logistic Regression, MLP)
+- **Validation**: Rolling window cross-validation with 2024 data used for evaluation
 
-## Current Results
+## Results Summary
 
-The project currently achieves approximately 4% improvement over the naive predictor (67.3% baseline) for SPY.
+The LSTM model achieved the best performance:
+- **Precision improvement over naive predictor**: 12.34% (exceeding the minimum 12% requirement)
+- **Accuracy**: 0.734
+- **Precision for oscillation class**: 0.798
 
-## Approach
+Other models' precision improvements:
+- Logistic Regression: 4.26%
+- KNN: 1.95%
+- Random Forest: -0.79%
+- MLP Classifier: 4.13%
 
-### Data Collection
-- Historical market data (2007-2024) downloaded via yfinance for:
-  - Global indices (Nikkei 225, Hang Seng, SSE Composite, ASX 200, DAX, FTSE 100, CAC 40, Euro Stoxx 50, SPY)
-  - Volatility indices (VIX, VIX Brazil, DAX Volatility)
-  - Currency pairs (US Dollar Index, EUR/USD, JPY/USD, CNY/USD)
-  - Commodities (Gold, Crude Oil, Silver, Corn, Copper)
-- Economic indicators from FRED API:
-  - Federal Funds Rate
-  - Treasury yield curves
-  - CPI, unemployment rate
-  - Financial stress indices
-- High-importance economic calendar events from investing.com
+## Running Locally with Conda
 
-### Feature Engineering
-- Technical indicators calculated for all assets:
-  - RSI (14-day)
-  - ATR (14-day)
-  - Bollinger Bands
-  - MACD
-  - Moving averages (SMA/EMA)
-  - Momentum indicators
-  - Stochastic oscillators
-- Different data handling based on market timing:
-  - Asian markets: Current day technical indicators
-  - European markets: Lag-1 technical indicators + current open
-  - SPY: Lag-1 technical indicators + current open + lag-1 raw values
-  - Other assets: Lag-1 technical indicators + current open
+1. Clone the repository:
+```cmd
+git clone https://github.com/jacobmillerforever/ECON_506.git
+```
+2. Create and activate the conda environment:
+```cmd
+conda env create -f environment.yml
+conda activate tf_env
+```
+3. Run Jupyter Notebook:
+```cmd
+jupyter notebook
+```
+4. Open the 506_Final_Project.ipynb notebook and run all cells.
 
-### Models Implemented
 
-1. **XGBoost Classifier**
-   - Initial run with all features
-   - Feature selection based on importance (top features covering 98% importance)
-   - Hyperparameters: max_depth=6, learning_rate=0.1, n_estimators=100
 
-2. **Logistic Regression**
-   - Run with selected features
-   - Class weight balancing applied
-   - Max iterations: 1000
+## Running on Google Colab
 
-3. **LSTM Neural Network**
-   - Hyperparameter tuning using Keras Tuner
-   - Architecture: Two LSTM layers with dropout
-   - Optimized learning rate and unit counts
-   - Class weight balancing for imbalanced data
+1. Open Google Colab: [https://colab.research.google.com/](https://colab.research.google.com/)
 
-### Evaluation
-- Train/test split: 2007-2023 for training, 2024 for testing
-- Target: SPY oscillation (absolute daily % change ≤ 0.5%)
-- Baseline accuracy: 67.3% (naive predictor)
-- Current best improvement: ~4% (LSTM model)
-- Metrics: Accuracy, precision, recall, F1-score, confusion matrices
+2. Upload the notebook via File → Upload notebook → Choose `506_Final_Project.ipynb`
 
-## Dependencies
-tensorflow
-numpy
-pandas
-yfinance
-fredapi
-investpy
-scikit-learn
-xgboost
-ta
-keras_tuner
-matplotlib
-seaborn
+3. Execute the necessary package installations at the beginning of the notebook:
+```python
+!pip install fredapi
+!pip install investpy
+!pip install ta
+!pip install keras_tuner
+```
+Run all cells in the notebook (Runtime → Run all)
+Note: To access GPU acceleration on Colab, select Runtime → Change runtime type → Hardware accelerator → GPU
 
-## Current Performance Summary
+## Data Sources
+The project uses multiple data sources:
 
-| Model                | Accuracy | Improvement over Naive |
-|---------------------|----------|------------------------|
-| Logistic Regression | 65.87%   | -1.59%                |
-| XGBoost             | 64.29%   | -3.17%                |
-| LSTM                | 71.43%   | 3.97%                 |
+ETF price data from Yahoo Finance (yfinance)
+Economic indicators from FRED (Federal Reserve Economic Data)
+Calendar dates for economic events from Investing.com
 
-## Usage
+## Key Features
+The prediction model leverages several important feature categories:
 
-1. Install required packages
-2. Run the Jupyter notebook on Google Colab with GPU acceleration
-3. Ensure FRED API key is available in the Colab environment
+Technical indicators (RSI, MACD, Bollinger Bands, etc.)
+Market volatility metrics (VIX)
+Macroeconomic indicators (interest rates, CPI, unemployment)
+Calendar events (Fed meetings, economic announcements)
+Temporal features (day of week, month)
 
-## Challenges and Next Steps
+## Model Architecture
+The best-performing LSTM model uses:
 
-- Current performance falls short of the 12% improvement target for full credit
-- Potential improvements:
-  - Feature engineering refinement
-  - Additional hyperparameter tuning
-  - Try more advanced architectures (CNNs, attention mechanisms)
-  - Explore different thresholds for oscillation definition
-  - Implement ensemble methods to combine model predictions
-
-## Author
-
-Jacob Miller and Rachel Tan
-
-## Course
-
-ECON 506 - Research Design
+Two LSTM layers (224 and 96 units) with dropout
+Dense layer with 128 units
+Training with class weights to address imbalance
+Multi-seed training strategy to optimize stability
